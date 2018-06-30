@@ -20,14 +20,11 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#include <string>
 #include <cstdint>
-#include <vector>
+#include <map>
 #include "log.h"
 
 class Config {
-private:
-    static std::string SHA224(const std::string &message);
 public:
     enum RunType {
         SERVER,
@@ -37,7 +34,8 @@ public:
     uint16_t local_port;
     std::string remote_addr;
     uint16_t remote_port;
-    std::vector<std::string> password;
+    std::map<std::string, std::string> password;
+    bool append_payload;
     Log::Level log_level;
     class SSLConfig {
     public:
@@ -56,7 +54,15 @@ public:
         std::string sigalgs;
         std::string dhparam;
     } ssl;
+    class TCPConfig {
+    public:
+        bool keep_alive;
+        bool no_delay;
+        bool fast_open;
+        int fast_open_qlen;
+    } tcp;
     void load(const std::string &filename);
+    static std::string SHA224(const std::string &message);
 };
 
 #endif // _CONFIG_H_

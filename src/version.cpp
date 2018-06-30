@@ -18,10 +18,9 @@
  */
 
 #include "version.h"
-#include <string>
 using namespace std;
 
-const string Version::version("0.6.1");
+const string Version::version("1.4.2");
 
 string Version::get_version() {
     return version;

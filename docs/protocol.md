@@ -1,10 +1,10 @@
 # The Trojan Protocol
 
-We will now show how a trojan server will react to a **valid Trojan Protocol**, and **other protocols** (possibly `HTTPS` or any other probes).
+We will now show how a trojan server will react to a **valid Trojan Protocol** and **other protocols** (possibly `HTTPS` or any other probes).
 
 ## Valid Trojan Protocol
 
-When a trojan client connects to a server, it first performs a **real** `TLS` handshake. If the handshake succeeds, all subsequent traffic will be protected by `TLS`; otherwise, the server will close the connection immediately, as any `HTTPS` server would. Then the client sends the following structure:
+When a trojan client connects to a server, it first performs a **real** `TLS` handshake. If the handshake succeeds, all subsequent traffic will be protected by `TLS`; otherwise, the server will close the connection immediately as any `HTTPS` server would. Then the client sends the following structure:
 
 ```
 +-----------------------+---------+----------------+---------+----------+
@@ -36,9 +36,17 @@ where:
 
 More information on `SOCKS5` requests can be found [here](https://tools.ietf.org/html/rfc1928).
 
-**Note that `UDP ASSOCIATE` has not been implemented in current version. The `CMD` field is reserved for future implementation (if needed).**
+If the connection is a `UDP ASSOCIATE`, then each `UDP` packet has the following format:
 
-When the server receives the first data packet, it unwraps the `TLS` packet and looks for the two `CRLF`s. Then it checks if the hashed password is correct and the Trojan Request is valid. On failure at any step, the protocol is considered "other protocols" (see next section). Note that the first packet will have payload (Application Data) appended. This avoids length pattern detection and may reduce the number of packets to be sent.
+```
++------+----------+----------+--------+---------+----------+
+| ATYP | DST.ADDR | DST.PORT | Length |  CRLF   | Payload  |
++------+----------+----------+--------+---------+----------+
+|  1   | Variable |    2     |   2    | X'0D0A' | Variable |
++------+----------+----------+--------+---------+----------+
+```
+
+When the server receives the first data packet, it checks if the hashed password is correct and the Trojan Request is valid. If not, the protocol is considered "other protocols" (see next section). Note that the first packet will have payload appended. This avoids length pattern detection and may reduce the number of packets to be sent.
 
 If the request is valid, the trojan server connects to the endpoint indicated by the `DST.ADDR` and `DST.PORT` field and opens a direct tunnel between the endpoint and trojan client.
 
@@ -56,7 +64,7 @@ All connection without correct structure and password will be redirected to a pr
 
 ### Passive Detection
 
-Because the traffic is protected by `TLS` (it is users' responsibility to use a valid certificate) and if you are visiting an `HTTP` site, the traffic looks exactly the same as `HTTPS` (there is only one `RTT` after `TLS` handshake). If you are not visiting an `HTTP` site, then the traffic looks exactly the same as `HTTPS` kept alive or `WebSocket`. Because of this, trojan can also bypass ISP `QoS` limitations.
+Because the traffic is protected by `TLS` (it is users' responsibility to use a valid certificate), if you are visiting an `HTTP` site, the traffic looks the same as `HTTPS` (there is only one `RTT` after `TLS` handshake); if you are not visiting an `HTTP` site, then the traffic looks the same as `HTTPS` kept alive or `WebSocket`. Because of this, trojan can also bypass ISP `QoS` limitations.
 
 For more information, go to [Issue #14](https://github.com/trojan-gfw/trojan/issues/14).
 

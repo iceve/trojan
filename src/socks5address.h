@@ -17,16 +17,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ssldefaults.h"
+#ifndef _SOCKS5ADDRESS_H_
+#define _SOCKS5ADDRESS_H_
 
-const char SSLDefaults::g_dh2048_sz[] =
-    "-----BEGIN DH PARAMETERS-----\n"
-    "MIIBCAKCAQEA///////////JD9qiIWjCNMTGYouA3BzRKQJOCIpnzHQCC76mOxOb\n"
-    "IlFKCHmONATd75UZs806QxswKwpt8l8UN0/hNW1tUcJF5IW1dmJefsb0TELppjft\n"
-    "awv/XLb0Brft7jhr+1qJn6WunyQRfEsf5kkoZlHs5Fs9wgB8uKFjvwWY2kg2HFXT\n"
-    "mmkWP6j9JM9fg2VdI9yjrZYcYvNWIIVSu57VKQdwlpZtZww1Tkq8mATxdGwIyhgh\n"
-    "fDKQXkYuNs474553LBgOhgObJ4Oi7Aeij7XFXfBvTFLJ3ivL9pVYFxg5lUl86pVq\n"
-    "5RXSJhiY+gUQFXKOWoqsqmj//////////wIBAg==\n"
-    "-----END DH PARAMETERS-----";
+#include <cstdint>
+#include <string>
+#include <boost/asio/ip/udp.hpp>
 
-const size_t SSLDefaults::g_dh2048_sz_size = sizeof(g_dh2048_sz);
+class SOCKS5Address {
+public:
+    enum AddressType {
+        IPv4 = 1,
+        DOMAINNAME = 3,
+        IPv6 = 4
+    } address_type;
+    std::string address;
+    uint16_t port;
+    int parse(const std::string &data);
+    static std::string generate(const boost::asio::ip::udp::endpoint &endpoint);
+};
+
+#endif // _SOCKS5ADDRESS_H_
